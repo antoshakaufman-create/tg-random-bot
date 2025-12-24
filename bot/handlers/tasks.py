@@ -12,9 +12,14 @@ from bot.config import PHOTOS_DIR
 router = Router()
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 @router.message(TaskStates.waiting_for_photo, F.photo)
 async def process_photo(message: Message, state: FSMContext, bot: Bot):
     """Handle photo upload."""
+    logger.info(f"Photo received from user {message.from_user.id}")
     # Get the largest photo (best quality)
     photo = message.photo[-1]
     
