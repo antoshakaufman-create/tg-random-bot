@@ -7,13 +7,13 @@ services:
       - key: BOT_TOKEN
         value: "8039764773:AAHRs8IXhxaVFhFke2-QlDaryKAyvggKo34"
       - key: EXEED_CHANNEL_ID
-        value: "@exeed_russia"
+        value: "@exeedrussia"
       - key: LUZHNIKI_CHANNEL_ID
-        value: "@luzhniki"
+        value: "@luzhniki_life"
       - key: EXEED_CHANNEL_URL
-        value: "https://t.me/exeed_russia"
+        value: "https://t.me/exeedrussia"
       - key: LUZHNIKI_CHANNEL_URL
-        value: "https://t.me/luzhniki"
+        value: "https://t.me/luzhniki_life"
       - key: DAILY_SMALL_PRIZES
         value: "100"
       - key: DAILY_BIG_PRIZES

@@ -7,10 +7,10 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 
 # Channel configuration
-EXEED_CHANNEL_ID = os.getenv("EXEED_CHANNEL_ID", "@exeed_russia")
-LUZHNIKI_CHANNEL_ID = os.getenv("LUZHNIKI_CHANNEL_ID", "@luzhniki")
-EXEED_CHANNEL_URL = os.getenv("EXEED_CHANNEL_URL", "https://t.me/exeed_russia")
-LUZHNIKI_CHANNEL_URL = os.getenv("LUZHNIKI_CHANNEL_URL", "https://t.me/luzhniki")
+EXEED_CHANNEL_ID = os.getenv("EXEED_CHANNEL_ID", "@exeedrussia")
+LUZHNIKI_CHANNEL_ID = os.getenv("LUZHNIKI_CHANNEL_ID", "@luzhniki_life")
+EXEED_CHANNEL_URL = os.getenv("EXEED_CHANNEL_URL", "https://t.me/exeedrussia")
+LUZHNIKI_CHANNEL_URL = os.getenv("LUZHNIKI_CHANNEL_URL", "https://t.me/luzhniki_life")
 STORAGE_CHANNEL_ID = os.getenv("STORAGE_CHANNEL_ID", "")
 
 # Randomizer settings (2 days, ~6000 visitors per day)
