@@ -7,7 +7,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.types import BufferedInputFile
 
-from bot.database import DATABASE_PATH
+from bot.config import DATABASE_PATH
 import aiosqlite
 
 router = Router()
