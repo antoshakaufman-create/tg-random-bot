@@ -1,0 +1,26 @@
+services:
+  - type: worker
+    name: tg-random-bot
+    runtime: docker
+    plan: free
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: EXEED_CHANNEL_ID
+        value: "@exeed_russia"
+      - key: LUZHNIKI_CHANNEL_ID
+        value: "@luzhniki"
+      - key: EXEED_CHANNEL_URL
+        value: "https://t.me/exeed_russia"
+      - key: LUZHNIKI_CHANNEL_URL
+        value: "https://t.me/luzhniki"
+      - key: DAILY_SMALL_PRIZES
+        value: "100"
+      - key: DAILY_BIG_PRIZES
+        value: "5"
+      - key: DAILY_VISITORS
+        value: "6000"
+      - key: SMALL_PRIZE_LIST
+        value: "Брелок EXEED,Значок,Стикерпак,Ручка,Магнит"
+      - key: BIG_PRIZE_LIST
+        value: "Термокружка,Шарф,Шапка,Перчатки,Плед"

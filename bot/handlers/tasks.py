@@ -1,0 +1,52 @@
+import os
+from datetime import datetime
+from aiogram import Router, Bot, F
+from aiogram.types import Message
+from aiogram.fsm.context import FSMContext
+
+from bot.handlers.states import TaskStates
+from bot.keyboards import get_finish_keyboard
+from bot.database import update_participant
+from bot.config import PHOTOS_DIR
+
+router = Router()
+
+
+@router.message(TaskStates.waiting_for_photo, F.photo)
+async def process_photo(message: Message, state: FSMContext, bot: Bot):
+    """Handle photo upload."""
+    # Get the largest photo (best quality)
+    photo = message.photo[-1]
+    
+    # Create filename with user_id and timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{message.from_user.id}_{timestamp}.jpg"
+    filepath = os.path.join(PHOTOS_DIR, filename)
+    
+    # Ensure photos directory exists
+    os.makedirs(PHOTOS_DIR, exist_ok=True)
+    
+    # Download and save photo
+    file = await bot.get_file(photo.file_id)
+    await bot.download_file(file.file_path, filepath)
+    
+    # Save photo path to database
+    await update_participant(message.from_user.id, photo_path=filepath)
+    
+    await message.answer(
+        "📸 <b>Отлично! Фото сохранено!</b>\n\n"
+        "🎟 Нажмите кнопку ниже, чтобы получить номер участника и узнать, выиграли ли вы приз!",
+        parse_mode="HTML",
+        reply_markup=get_finish_keyboard()
+    )
+    
+    await state.set_state(TaskStates.ready_for_result)
+
+
+@router.message(TaskStates.waiting_for_photo)
+async def handle_no_photo(message: Message, state: FSMContext):
+    """Handle non-photo messages when expecting photo."""
+    await message.answer(
+        "❌ Пожалуйста, отправьте фото.\n\n"
+        "Сделайте классное фото на катке и отправьте его сюда! 📷"
+    )
