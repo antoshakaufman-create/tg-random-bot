@@ -23,16 +23,22 @@ async def get_result_callback(callback: CallbackQuery, state: FSMContext):
         await callback.answer("❌ Пожалуйста, сначала выполните все задания!", show_alert=True)
         return
     
-    # Get participant number
-    participant_number = await get_next_participant_number()
+    # Get participant data to retrieve assigned number
+    from bot.database import get_or_create_participant
+    participant = await get_or_create_participant(callback.from_user.id)
+    participant_number = participant.get("participant_number")
+    
+    # Fallback if for some reason number is missing (should not happen in normal flow)
+    if not participant_number:
+        participant_number = await get_next_participant_number()
     
     # Check if winner (returns is_winner, prize, prize_type)
     is_winner, prize, prize_type = await check_win()
     
-    # Update participant record
+    # Update participant record (only win status)
     await update_participant(
         callback.from_user.id,
-        participant_number=participant_number,
+        participant_number=participant_number, # ensure it's saved/kept
         is_winner=is_winner,
         prize=prize,
         prize_type=prize_type

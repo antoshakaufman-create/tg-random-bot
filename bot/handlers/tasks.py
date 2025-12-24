@@ -30,27 +30,36 @@ async def process_photo(message: Message, state: FSMContext, bot: Bot):
     file = await bot.get_file(photo.file_id)
     await bot.download_file(file.file_path, filepath)
     
-    # Save photo path to database
-    await update_participant(message.from_user.id, photo_path=filepath)
+    # Get participant data (name, phone)
+    from bot.database import get_or_create_participant, get_next_participant_number
+    participant = await get_or_create_participant(message.from_user.id)
+    
+    # Generate participant number immediately
+    participant_number = await get_next_participant_number()
+    
+    # Save photo path and number to database
+    await update_participant(
+        message.from_user.id, 
+        photo_path=filepath,
+        participant_number=participant_number
+    )
     
     # Forward to storage channel if configured
     from bot.config import STORAGE_CHANNEL_ID
     if STORAGE_CHANNEL_ID:
         try:
             user = message.from_user
-            participant_data = await get_participant_data(user.id) # We need to fetch data first or pass it
-            # Actually we don't have get_participant_data imported here, let's look at the imports. 
-            # We can just use the info we have or fetch from DB.
-            # Let's simplify: just name and username from message.from_user, and phone from DB if we want.
-            # But wait, phone is in DB.
+            name = participant.get("name", "Не указано")
+            phone = participant.get("phone", "Не указано")
+            username = f"@{user.username}" if user.username else "Нет"
             
             caption = (
-                f"👤 <b>Новый участник</b>\n"
-                f"ID: {user.id}\n"
-                f"Username: @{user.username or 'нет'}\n"
-                f"First Name: {user.first_name}\n"
-                f"Last Name: {user.last_name or ''}\n"
-                f"File: {filename}"
+                f"👤 <b>Новый участник #{participant_number}</b>\n\n"
+                f"🆔 ID: <code>{user.id}</code>\n"
+                f"👤 Имя: {name}\n"
+                f"📱 Телефон: {phone}\n"
+                f"🔗 Username: {username}\n\n"
+                f"📁 Файл: {filename}"
             )
             
             await bot.send_photo(
@@ -58,6 +67,9 @@ async def process_photo(message: Message, state: FSMContext, bot: Bot):
                 photo=photo.file_id,
                 caption=caption
             )
+        except Exception as e:
+            # Don't fail the user flow if saving fails
+            print(f"Failed to forward photo to storage: {e}")
         except Exception as e:
             # Don't fail the user flow if saving fails
             print(f"Failed to forward photo to storage: {e}")
