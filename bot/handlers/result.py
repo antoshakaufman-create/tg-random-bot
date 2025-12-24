@@ -50,12 +50,14 @@ async def get_result_callback(callback: CallbackQuery, state: FSMContext):
     participant = await get_or_create_participant(callback.from_user.id)
     existing_number = participant.get("participant_number")
     existing_prize = participant.get("prize")
-    existing_winner = participant.get("is_winner")
+    existing_prize_type = participant.get("prize_type")  # Only set after actual participation
     
     # --- DUPLICATE CHECK ---
-    if existing_number and existing_winner is not None:
+    # Check prize_type because is_winner might be 0 by default
+    if existing_number and existing_prize_type is not None:
+
         # User already participated - show their existing result
-        if existing_winner:
+        if participant.get("is_winner"):
             prize_type = participant.get("prize_type", "small")
             emoji = "🎉🎉🎉" if prize_type == "big" else "🎁"
             prize_label = "БОЛЬШОЙ ПРИЗ" if prize_type == "big" else "Приз"
