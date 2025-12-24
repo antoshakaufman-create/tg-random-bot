@@ -5,7 +5,7 @@ services:
     plan: free
     envVars:
       - key: BOT_TOKEN
-        sync: false
+        value: "8039764773:AAHRs8IXhxaVFhFke2-QlDaryKAyvggKo34"
       - key: EXEED_CHANNEL_ID
         value: "@exeed_russia"
       - key: LUZHNIKI_CHANNEL_ID
