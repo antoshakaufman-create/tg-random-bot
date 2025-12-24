@@ -18,11 +18,11 @@ async def export_database(message: types.Message):
     """Export participants database to CSV."""
     logger.info(f"Export requested by user {message.from_user.id}")
     
-    # Simple security check (optional: check if user is admin)
-    # For now, we'll allow it for convenience, or you can uncomment below to restrict
-    # ALLOWED_ADMINS = [your_id]
-    # if message.from_user.id not in ALLOWED_ADMINS:
-    #     return
+    # Security check: Only allow specific admin
+    ADMIN_ID = 802692559
+    if message.from_user.id != ADMIN_ID:
+        await message.answer("⛔️ У вас нет прав для выполнения этой команды.")
+        return
 
     try:
         async with aiosqlite.connect(DATABASE_PATH) as db:
