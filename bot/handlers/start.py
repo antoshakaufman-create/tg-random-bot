@@ -84,11 +84,19 @@ async def process_phone_contact(message: Message, state: FSMContext):
 @router.message(RegistrationStates.waiting_for_phone)
 async def process_phone_text(message: Message, state: FSMContext):
     """Handle text input when expecting phone."""
-    # Check if it looks like a phone number
+    # Check if message has text
+    if not message.text:
+        await message.answer(
+            "❌ Пожалуйста, нажмите кнопку ниже, чтобы поделиться номером телефона.",
+            reply_markup=get_phone_keyboard()
+        )
+        return
+    
     text = message.text.strip()
     
     # Simple phone validation (allows various formats)
     digits = ''.join(filter(str.isdigit, text))
+
     
     if len(digits) >= 10 and len(digits) <= 15:
         # Save phone to database
