@@ -61,3 +61,39 @@ async def export_database(message: types.Message):
     except Exception as e:
         logger.error(f"Export failed: {e}")
         await message.answer(f"❌ Ошибка экспорта: {e}")
+
+
+ADMIN_ID = 802692559
+
+
+@router.message(Command("reset_me"))
+async def reset_me(message: types.Message):
+    """Reset admin's participation status for testing."""
+    if message.from_user.id != ADMIN_ID:
+        await message.answer("⛔️ Команда доступна только администратору.")
+        return
+    
+    try:
+        async with aiosqlite.connect(DATABASE_PATH) as db:
+            await db.execute(
+                """UPDATE participants 
+                   SET participant_number = NULL, 
+                       is_winner = NULL, 
+                       prize = NULL, 
+                       prize_type = NULL,
+                       photo_path = NULL
+                   WHERE telegram_id = ?""",
+                (message.from_user.id,)
+            )
+            await db.commit()
+        
+        await message.answer(
+            "✅ <b>Ваш статус сброшен!</b>\n\n"
+            "Теперь вы можете пройти путь заново.\n"
+            "Отправьте /start для начала.",
+            parse_mode="HTML"
+        )
+    except Exception as e:
+        logger.error(f"Reset failed: {e}")
+        await message.answer(f"❌ Ошибка: {e}")
+
