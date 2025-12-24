@@ -73,11 +73,9 @@ async def process_photo(message: Message, state: FSMContext, bot: Bot):
                 caption=caption
             )
         except Exception as e:
-            # Don't fail the user flow if saving fails
-            print(f"Failed to forward photo to storage: {e}")
-        except Exception as e:
-            # Don't fail the user flow if saving fails
-            print(f"Failed to forward photo to storage: {e}")
+            # Debugging: Show error to user
+            logger.error(f"Failed to forward photo: {e}")
+            await message.answer(f"⚠️ <b>Debug:</b> Не удалось переслать фото в канал.\nОшибка: {str(e)}", parse_mode="HTML")
 
     await message.answer(
         "📸 <b>Отлично! Фото сохранено!</b>\n\n"
