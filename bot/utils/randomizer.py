@@ -2,6 +2,11 @@
 Smart prize randomizer with time-based distribution.
 Ensures prizes are distributed evenly across operating hours.
 Uses Moscow timezone (UTC+3) since the rink is in Moscow.
+
+Distribution schedule:
+- 9:30-12:00 (morning): Low probability - save prizes
+- 12:00-17:00 (afternoon): Normal probability
+- 17:00-22:30 (evening): Higher probability - ensure all given
 """
 import random
 from datetime import datetime, time, timezone, timedelta
@@ -31,36 +36,51 @@ def get_day_progress() -> float:
     """
     Calculate progress through the operating day (0.0 to 1.0).
     Uses Moscow timezone.
-    
-    Returns:
-        float: 0.0 at opening, 1.0 at closing, clamped to [0, 1]
     """
     now = get_moscow_time().time()
     
-    # Convert times to minutes since midnight
     now_minutes = now.hour * 60 + now.minute
     open_minutes = OPEN_TIME.hour * 60 + OPEN_TIME.minute
     close_minutes = CLOSE_TIME.hour * 60 + CLOSE_TIME.minute
     
-    # Calculate progress
     total_minutes = close_minutes - open_minutes  # 780 minutes = 13 hours
     elapsed = now_minutes - open_minutes
     
     progress = elapsed / total_minutes
-    
-    # Clamp to [0, 1]
     return max(0.0, min(1.0, progress))
+
+
+def get_time_weight() -> float:
+    """
+    Get probability weight based on time of day.
+    Returns multiplier (0.5 to 2.0) for prize probability.
+    
+    Schedule:
+    - 9:30-11:30 (first 2 hours): 0.5x - save prizes for later
+    - 11:30-17:00 (middle): 1.0x - normal distribution
+    - 17:00-20:30 (evening): 1.3x - slightly higher
+    - 20:30-22:30 (last 2 hours): 2.0x - give remaining prizes
+    """
+    progress = get_day_progress()
+    
+    if progress < 0.15:  # First 2 hours (9:30-11:30)
+        return 0.5
+    elif progress < 0.58:  # 11:30-17:00
+        return 1.0
+    elif progress < 0.85:  # 17:00-20:30
+        return 1.3
+    else:  # Last 2 hours (20:30-22:30)
+        return 2.0
 
 
 async def check_win() -> tuple[bool, str | None, str | None]:
     """
     Check if current participant wins a prize.
     
-    Uses PURE TIME-BASED distribution:
-    - Prizes are distributed evenly across operating hours
-    - Works with ANY number of participants
-    - If behind schedule → higher probability
-    - If ahead of schedule → lower probability
+    Uses time-weighted distribution:
+    - Morning: Lower probability (save prizes)
+    - Evening: Higher probability (ensure all distributed)
+    - End of day: Very high probability (must give remaining)
     
     Returns:
         tuple: (is_winner, prize_name or None, prize_type: 'big'/'small'/None)
@@ -72,36 +92,38 @@ async def check_win() -> tuple[bool, str | None, str | None]:
     remaining_big = DAILY_BIG_PRIZES - big_given
     remaining_small = DAILY_SMALL_PRIZES - small_given
     
-    # Get time progress through the day (Moscow time)
+    # Time-based calculations
     time_progress = get_day_progress()
+    time_weight = get_time_weight()
+    remaining_time = max(0.01, 1.0 - time_progress)
     
-    # Calculate expected prizes by now (based on time only)
-    expected_small_by_now = DAILY_SMALL_PRIZES * time_progress
-    expected_big_by_now = DAILY_BIG_PRIZES * time_progress
+    # Expected prizes by now
+    expected_small = DAILY_SMALL_PRIZES * time_progress
+    expected_big = DAILY_BIG_PRIZES * time_progress
     
-    # Calculate deficit (positive = behind, negative = ahead)
-    small_deficit = expected_small_by_now - small_given
-    big_deficit = expected_big_by_now - big_given
-    
-    # Remaining time fraction
-    remaining_time = max(0.01, 1.0 - time_progress)  # Avoid division by zero
+    # Deficit (positive = behind schedule)
+    small_deficit = expected_small - small_given
+    big_deficit = expected_big - big_given
     
     # --- Big Prize Check ---
     if remaining_big > 0:
-        # Base: how many prizes should we give in remaining time?
-        # If we have 5 prizes left and 50% time left, that's 10 per remaining time
-        base_probability = remaining_big / (remaining_time * 100)  # Spread over ~100 participants per hour
+        # Base probability: spread remaining over remaining time
+        base_prob = (remaining_big / DAILY_BIG_PRIZES) * 0.02  # ~2% base
         
-        # Boost if behind schedule
+        # Adjust for deficit
         if big_deficit > 0:
-            boost = 1.0 + (big_deficit * 0.5)  # +50% per prize behind
+            deficit_mult = 1.0 + (big_deficit * 0.5)
         else:
-            boost = max(0.5, 1.0 + (big_deficit * 0.3))  # Reduce if ahead
+            deficit_mult = max(0.3, 1.0 + (big_deficit * 0.2))
         
-        big_chance = base_probability * boost
+        # Force distribution near end of day
+        if time_progress > 0.9:  # Last 10% of day
+            urgency = 1.0 + (remaining_big * 0.5)  # +50% per remaining prize
+        else:
+            urgency = 1.0
         
-        # Cap at 15%
-        big_chance = min(big_chance, 0.15)
+        big_chance = base_prob * time_weight * deficit_mult * urgency
+        big_chance = min(big_chance, 0.20)  # Cap at 20%
         
         if random.random() < big_chance:
             prize = random.choice(BIG_PRIZE_LIST)
@@ -109,17 +131,20 @@ async def check_win() -> tuple[bool, str | None, str | None]:
     
     # --- Small Prize Check ---
     if remaining_small > 0:
-        base_probability = remaining_small / (remaining_time * 100)
+        base_prob = (remaining_small / DAILY_SMALL_PRIZES) * 0.25  # ~25% base
         
         if small_deficit > 0:
-            boost = 1.0 + (small_deficit * 0.02)  # +2% per prize behind
+            deficit_mult = 1.0 + (small_deficit * 0.02)
         else:
-            boost = max(0.5, 1.0 + (small_deficit * 0.01))
+            deficit_mult = max(0.3, 1.0 + (small_deficit * 0.01))
         
-        small_chance = base_probability * boost
+        if time_progress > 0.9:
+            urgency = 1.0 + (remaining_small * 0.02)
+        else:
+            urgency = 1.0
         
-        # Cap at 50%
-        small_chance = min(small_chance, 0.50)
+        small_chance = base_prob * time_weight * deficit_mult * urgency
+        small_chance = min(small_chance, 0.60)  # Cap at 60%
         
         if random.random() < small_chance:
             prize = random.choice(SMALL_PRIZE_LIST)
