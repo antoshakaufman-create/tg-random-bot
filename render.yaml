@@ -19,7 +19,7 @@ services:
       - key: DAILY_BIG_PRIZES
         value: "5"
       - key: DAILY_VISITORS
-        value: "6000"
+        value: "500"
       - key: SMALL_PRIZE_LIST
         value: "Брелок EXEED,Значок,Стикерпак,Ручка,Магнит"
       - key: BIG_PRIZE_LIST
