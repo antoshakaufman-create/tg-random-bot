@@ -56,6 +56,9 @@ async def main():
     # Initialize database
     await init_db()
     logger.info("Database initialized")
+
+    from bot.config import STORAGE_CHANNEL_ID
+    logger.info(f"Configured STORAGE_CHANNEL_ID: '{STORAGE_CHANNEL_ID}'")
     
     # Create bot and dispatcher
     bot = Bot(
