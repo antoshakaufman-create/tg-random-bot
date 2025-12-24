@@ -11,6 +11,7 @@ EXEED_CHANNEL_ID = os.getenv("EXEED_CHANNEL_ID", "@exeed_russia")
 LUZHNIKI_CHANNEL_ID = os.getenv("LUZHNIKI_CHANNEL_ID", "@luzhniki")
 EXEED_CHANNEL_URL = os.getenv("EXEED_CHANNEL_URL", "https://t.me/exeed_russia")
 LUZHNIKI_CHANNEL_URL = os.getenv("LUZHNIKI_CHANNEL_URL", "https://t.me/luzhniki")
+STORAGE_CHANNEL_ID = os.getenv("STORAGE_CHANNEL_ID", "")
 
 # Randomizer settings (2 days, ~6000 visitors per day)
 DAILY_SMALL_PRIZES = int(os.getenv("DAILY_SMALL_PRIZES", "100"))  # маленькие подарки

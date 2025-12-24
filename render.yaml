@@ -24,3 +24,5 @@ services:
         value: "Брелок EXEED,Значок,Стикерпак,Ручка,Магнит"
       - key: BIG_PRIZE_LIST
         value: "Термокружка,Шарф,Шапка,Перчатки,Плед"
+      - key: STORAGE_CHANNEL_ID
+        value: "" # PLACEHOLDER: Enter Channel ID here (e.g., -100123456789)
