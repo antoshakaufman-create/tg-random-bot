@@ -57,6 +57,16 @@ async def main():
     await init_db()
     logger.info("Database initialized")
 
+    # ONE-TIME CLEANUP - REMOVE AFTER TESTING
+    import aiosqlite
+    from bot.config import DATABASE_PATH
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("DELETE FROM participants")
+        await db.execute("DELETE FROM daily_stats")
+        await db.commit()
+    logger.info("🗑 DATABASE CLEARED ON STARTUP")
+
+
     from bot.config import STORAGE_CHANNEL_ID
     logger.info(f"Configured STORAGE_CHANNEL_ID: '{STORAGE_CHANNEL_ID}'")
     
