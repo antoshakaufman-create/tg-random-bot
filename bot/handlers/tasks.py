@@ -51,6 +51,8 @@ async def process_photo(message: Message, state: FSMContext, bot: Bot):
     
     # Forward to storage channel if configured
     from bot.config import STORAGE_CHANNEL_ID
+    logger.info(f"DEBUG: STORAGE_CHANNEL_ID value is '{STORAGE_CHANNEL_ID}'")
+    
     if STORAGE_CHANNEL_ID:
         try:
             user = message.from_user

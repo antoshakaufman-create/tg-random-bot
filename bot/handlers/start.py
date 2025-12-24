@@ -33,6 +33,10 @@ async def cmd_start(message: Message, state: FSMContext):
 @router.message(RegistrationStates.waiting_for_name)
 async def process_name(message: Message, state: FSMContext):
     """Process user's name."""
+    if not message.text:
+        await message.answer("❌ Пожалуйста, введите ваше имя текстом.")
+        return
+
     name = message.text.strip()
     
     if len(name) < 2 or len(name) > 100:
