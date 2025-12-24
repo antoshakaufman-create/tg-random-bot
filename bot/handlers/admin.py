@@ -117,3 +117,34 @@ async def reset_me(message: types.Message):
         await message.answer(f"❌ Ошибка: {e}")
 
 
+@router.message(Command("reset_all"))
+async def reset_all(message: types.Message):
+    """Clear entire database - all participants and stats."""
+    if message.from_user.id != ADMIN_ID:
+        await message.answer("⛔️ Команда доступна только администратору.")
+        return
+    
+    try:
+        async with aiosqlite.connect(DATABASE_PATH) as db:
+            # Count before
+            cursor = await db.execute("SELECT COUNT(*) FROM participants")
+            count = (await cursor.fetchone())[0]
+            
+            # Delete all
+            await db.execute("DELETE FROM participants")
+            await db.execute("DELETE FROM daily_stats")
+            await db.commit()
+        
+        await message.answer(
+            f"🗑 <b>База данных очищена!</b>\n\n"
+            f"Удалено записей: {count}\n\n"
+            f"Все участники и статистика сброшены.\n"
+            f"Отправьте /start для тестирования.",
+            parse_mode="HTML"
+        )
+    except Exception as e:
+        logger.error(f"Reset all failed: {e}")
+        await message.answer(f"❌ Ошибка: {e}")
+
+
+
