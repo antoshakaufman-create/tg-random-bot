@@ -75,6 +75,15 @@ async def reset_me(message: types.Message):
     
     try:
         async with aiosqlite.connect(DATABASE_PATH) as db:
+            # First, check current state
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT * FROM participants WHERE telegram_id = ?",
+                (message.from_user.id,)
+            )
+            before = await cursor.fetchone()
+            
+            # Reset the record
             await db.execute(
                 """UPDATE participants 
                    SET participant_number = NULL, 
@@ -86,14 +95,25 @@ async def reset_me(message: types.Message):
                 (message.from_user.id,)
             )
             await db.commit()
+            
+            # Verify reset
+            cursor = await db.execute(
+                "SELECT participant_number, is_winner FROM participants WHERE telegram_id = ?",
+                (message.from_user.id,)
+            )
+            after = await cursor.fetchone()
+        
+        before_info = f"До: номер={before['participant_number']}, winner={before['is_winner']}" if before else "До: не найден"
+        after_info = f"После: номер={after['participant_number'] if after else 'N/A'}, winner={after['is_winner'] if after else 'N/A'}"
         
         await message.answer(
-            "✅ <b>Ваш статус сброшен!</b>\n\n"
-            "Теперь вы можете пройти путь заново.\n"
-            "Отправьте /start для начала.",
+            f"✅ <b>Статус сброшен!</b>\n\n"
+            f"<code>{before_info}\n{after_info}</code>\n\n"
+            f"Отправьте /start и пройдите путь заново.",
             parse_mode="HTML"
         )
     except Exception as e:
         logger.error(f"Reset failed: {e}")
         await message.answer(f"❌ Ошибка: {e}")
+
 
