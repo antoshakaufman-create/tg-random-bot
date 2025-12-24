@@ -25,4 +25,4 @@ services:
       - key: BIG_PRIZE_LIST
         value: "Термокружка,Шарф,Шапка,Перчатки,Плед"
       - key: STORAGE_CHANNEL_ID
-        value: "" # PLACEHOLDER: Enter Channel ID here (e.g., -100123456789)
+        value: "-1003612887645"
