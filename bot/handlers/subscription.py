@@ -5,7 +5,7 @@ from aiogram.enums import ChatMemberStatus
 
 from bot.handlers.states import TaskStates
 from bot.keyboards import get_subscription_keyboard
-from bot.config import EXEED_CHANNEL_ID, LUZHNIKI_CHANNEL_ID, VK_POST_URL
+from bot.config import EXEED_CHANNEL_ID, LUZHNIKI_CHANNEL_ID
 
 router = Router()
 
