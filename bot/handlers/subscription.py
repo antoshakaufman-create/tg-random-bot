@@ -29,14 +29,13 @@ async def check_subscription_callback(callback: CallbackQuery, state: FSMContext
     """Handle subscription check button."""
     user_id = callback.from_user.id
     
-    # Check both channels
+    # Check only EXEED channel (Лужники doesn't allow member list access)
     exeed_subscribed = await check_user_subscription(bot, user_id, EXEED_CHANNEL_ID)
-    luzhniki_subscribed = await check_user_subscription(bot, user_id, LUZHNIKI_CHANNEL_ID)
     
-    if exeed_subscribed and luzhniki_subscribed:
-        # User is subscribed to both channels
+    if exeed_subscribed:
+        # User is subscribed
         await callback.message.edit_text(
-            "✅ <b>Отлично! Вы подписаны на оба канала!</b>\n\n"
+            "✅ <b>Отлично! Вы подписаны на канал EXEED!</b>\n\n"
             "📸 <b>Шаг 4:</b> Сделайте фото на катке и отправьте его в этот чат.\n\n"
             "Просто сделайте классное фото и отправьте его сюда! 📷",
             parse_mode="HTML"
@@ -44,23 +43,15 @@ async def check_subscription_callback(callback: CallbackQuery, state: FSMContext
         
         await state.set_state(TaskStates.waiting_for_photo)
     else:
-        # User not subscribed to one or both channels
-        not_subscribed = []
-        if not exeed_subscribed:
-            not_subscribed.append("EXEED Russia")
-        if not luzhniki_subscribed:
-            not_subscribed.append("Лужники")
-        
-        channels_text = " и ".join(not_subscribed)
-        
         await callback.answer(
-            f"❌ Вы не подписаны на: {channels_text}",
+            "❌ Вы не подписаны на канал EXEED Russia",
             show_alert=True
         )
         
         await callback.message.edit_text(
-            f"❌ <b>Вы ещё не подписаны на: {channels_text}</b>\n\n"
-            "Пожалуйста, подпишитесь на каналы и нажмите кнопку снова:",
+            "❌ <b>Вы ещё не подписаны на канал EXEED Russia</b>\n\n"
+            "Пожалуйста, подпишитесь на канал и нажмите кнопку снова:",
             parse_mode="HTML",
             reply_markup=get_subscription_keyboard()
         )
+
