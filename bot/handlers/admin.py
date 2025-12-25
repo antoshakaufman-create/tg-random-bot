@@ -180,3 +180,65 @@ async def check_channels(message: types.Message, bot: Bot):
         f"<b>Статус бота в каналах:</b>\n\n" + "\n".join(results),
         parse_mode="HTML"
     )
+
+
+@router.message(Command("check_subs"))
+async def check_subs(message: types.Message, bot: Bot):
+    """Check if all DB participants are subscribed to EXEED channel."""
+    if message.from_user.id != ADMIN_ID:
+        await message.answer("⛔️ Команда доступна только администратору.")
+        return
+    
+    await message.answer("⏳ Проверяю подписки участников...")
+    
+    try:
+        async with aiosqlite.connect(DATABASE_PATH) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute("SELECT telegram_id, name FROM participants")
+            rows = await cursor.fetchall()
+        
+        if not rows:
+            await message.answer("📁 База данных пуста.")
+            return
+        
+        subscribed = 0
+        not_subscribed = 0
+        errors = 0
+        not_sub_list = []
+        
+        from aiogram.enums import ChatMemberStatus
+        
+        for row in rows:
+            try:
+                member = await bot.get_chat_member(
+                    chat_id=EXEED_CHANNEL_ID, 
+                    user_id=row["telegram_id"]
+                )
+                if member.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]:
+                    subscribed += 1
+                else:
+                    not_subscribed += 1
+                    not_sub_list.append(f"{row['name']} (ID: {row['telegram_id']})")
+            except Exception:
+                errors += 1
+        
+        # Prepare not subscribed list (max 10)
+        not_sub_text = ""
+        if not_sub_list:
+            not_sub_text = "\n\n<b>Не подписаны:</b>\n" + "\n".join(not_sub_list[:10])
+            if len(not_sub_list) > 10:
+                not_sub_text += f"\n... и ещё {len(not_sub_list) - 10}"
+        
+        await message.answer(
+            f"<b>Проверка подписок на EXEED:</b>\n\n"
+            f"✅ Подписаны: {subscribed}\n"
+            f"❌ Не подписаны: {not_subscribed}\n"
+            f"⚠️ Ошибки: {errors}\n"
+            f"📊 Всего: {len(rows)}"
+            f"{not_sub_text}",
+            parse_mode="HTML"
+        )
+        
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
+
