@@ -1,8 +1,12 @@
 services:
-  - type: worker
+  - type: web
     name: tg-random-bot
     runtime: docker
-    plan: free
+    plan: starter
+    disk:
+      name: bot-data
+      mountPath: /data
+      sizeGB: 1
     envVars:
       - key: BOT_TOKEN
         value: "8039764773:AAHRs8IXhxaVFhFke2-QlDaryKAyvggKo34"
@@ -26,3 +30,7 @@ services:
         value: "Термокружка,Шарф,Шапка,Перчатки,Плед"
       - key: STORAGE_CHANNEL_ID
         value: "-1003612887645"
+      - key: DATABASE_PATH
+        value: "/data/database.db"
+      - key: PHOTOS_DIR
+        value: "/data/photos"

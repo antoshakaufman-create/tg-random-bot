@@ -22,6 +22,7 @@ DAILY_VISITORS = int(os.getenv("DAILY_VISITORS", "6000"))
 SMALL_PRIZE_LIST = os.getenv("SMALL_PRIZE_LIST", "Брелок EXEED,Значок,Стикерпак,Ручка,Магнит").split(",")
 BIG_PRIZE_LIST = os.getenv("BIG_PRIZE_LIST", "Термокружка,Шарф,Шапка,Перчатки,Плед").split(",")
 
-# Paths
-PHOTOS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "photos")
-DATABASE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db")
+# Paths - use env vars for persistent disk on Render
+PHOTOS_DIR = os.getenv("PHOTOS_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "photos"))
+DATABASE_PATH = os.getenv("DATABASE_PATH", os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db"))
+
