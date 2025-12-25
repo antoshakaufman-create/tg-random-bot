@@ -147,4 +147,36 @@ async def reset_all(message: types.Message):
         await message.answer(f"❌ Ошибка: {e}")
 
 
+from aiogram import Bot
+from bot.config import EXEED_CHANNEL_ID, LUZHNIKI_CHANNEL_ID
 
+
+@router.message(Command("check_channels"))
+async def check_channels(message: types.Message, bot: Bot):
+    """Check if bot is admin in required channels."""
+    if message.from_user.id != ADMIN_ID:
+        await message.answer("⛔️ Команда доступна только администратору.")
+        return
+    
+    results = []
+    
+    for channel_id, name in [(EXEED_CHANNEL_ID, "EXEED"), (LUZHNIKI_CHANNEL_ID, "Лужники")]:
+        try:
+            # Get bot's own info
+            me = await bot.get_me()
+            # Try to get bot's membership in channel
+            member = await bot.get_chat_member(chat_id=channel_id, user_id=me.id)
+            
+            if member.status in ["administrator", "creator"]:
+                results.append(f"✅ {name}: Бот — администратор")
+            elif member.status == "member":
+                results.append(f"⚠️ {name}: Бот — участник (не админ!)")
+            else:
+                results.append(f"❌ {name}: Статус — {member.status}")
+        except Exception as e:
+            results.append(f"❌ {name}: Ошибка — {str(e)[:50]}")
+    
+    await message.answer(
+        f"<b>Статус бота в каналах:</b>\n\n" + "\n".join(results),
+        parse_mode="HTML"
+    )
