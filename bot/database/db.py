@@ -139,3 +139,14 @@ async def increment_daily_stats(small_prizes: int = 0, big_prizes: int = 0, part
             (participants, small_prizes, big_prizes, today)
         )
         await db.commit()
+
+
+async def delete_participant(telegram_id: int) -> bool:
+    """Delete a participant from database."""
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        cursor = await db.execute(
+            "DELETE FROM participants WHERE telegram_id = ?",
+            (telegram_id,)
+        )
+        await db.commit()
+        return cursor.rowcount > 0

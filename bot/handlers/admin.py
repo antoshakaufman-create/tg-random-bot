@@ -7,7 +7,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.types import BufferedInputFile
 
-from bot.config import DATABASE_PATH
+from bot.database import delete_participant
 import aiosqlite
 
 router = Router()
@@ -240,5 +240,36 @@ async def check_subs(message: types.Message, bot: Bot):
         )
         
     except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
+
+
+@router.message(Command("reset_user"))
+async def reset_specific_user(message: types.Message):
+    """Reset a specific user by ID."""
+    if message.from_user.id != ADMIN_ID:
+        await message.answer("⛔️ Команда доступна только администратору.")
+        return
+    
+    try:
+        # Parse arguments
+        args = message.text.split()
+        if len(args) != 2:
+            await message.answer("ℹ️ Использование: /reset_user <id>")
+            return
+            
+        target_id = int(args[1])
+        
+        from bot.database import delete_participant
+        success = await delete_participant(target_id)
+        
+        if success:
+            await message.answer(f"✅ Участник {target_id} удалён из базы данных.")
+        else:
+            await message.answer(f"⚠️ Участник {target_id} не найден в базе.")
+            
+    except ValueError:
+        await message.answer("❌ ID должен быть числом.")
+    except Exception as e:
+        logger.error(f"Reset user failed: {e}")
         await message.answer(f"❌ Ошибка: {e}")
 
