@@ -59,20 +59,32 @@ async def get_result_callback(callback: CallbackQuery, state: FSMContext):
 
         # User already participated - show their existing result
         if participant.get("is_winner"):
-            await callback.message.edit_text(
-                f"🎫 Вы уже участвовали!\n\n"
-                f"Ваш номер: <b>#{existing_number}</b> 🎉\n\n"
-                f"🏆 Вы выиграли приз от EXEED!\n"
-                f"Покажите это сообщение промоутеру на стойке EXEED 🎁",
-                parse_mode="HTML"
+            # Send photo with win reminder
+            brand_zone_photo = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "brand_zone.jpg")
+            
+            win_caption = (
+                f"Вы уже участвовали!\n"
+                f"Ваш номер: {existing_number} 🎉\n\n"
+                f"Вы выиграли приз от EXEED — фирменный мерч.\n"
+                f"Чтобы получить подарок, подойдите на бренд-зону EXEED возле павильона №1 и назовите свой номер участника."
             )
+            
+            await callback.message.delete()
+            
+            if os.path.exists(brand_zone_photo):
+                await callback.message.answer_photo(
+                    photo=FSInputFile(brand_zone_photo),
+                    caption=win_caption
+                )
+            else:
+                await callback.message.answer(win_caption)
         else:
             await callback.message.edit_text(
-                f"🎫 Вы уже участвовали!\n\n"
-                f"Ваш номер: <b>#{existing_number}</b>\n\n"
-                f"В этот раз не повезло, но впереди ещё много активностей! 🌟\n"
-                f"Следите за новостями в @exeedrussia",
-                parse_mode="HTML"
+                f"Вы уже участвовали!\n"
+                f"Ваш номер: {existing_number}\n"
+                f"К сожалению, в этот раз без призов.\n\n"
+                f"Но не расстраивайтесь — впереди ещё много активностей от EXEED!\n"
+                f"Следите за новостями в @exeedrussia."
             )
         await state.clear()
         return
