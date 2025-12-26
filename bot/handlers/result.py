@@ -119,4 +119,4 @@ async def get_result_callback(callback: CallbackQuery, state: FSMContext):
         )
     
     await state.clear()
-```
+
