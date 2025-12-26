@@ -4,7 +4,8 @@ from .db import (
     update_participant,
     get_next_participant_number,
     get_daily_stats,
-    increment_daily_stats
+    increment_daily_stats,
+    delete_participant
 )
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     "update_participant",
     "get_next_participant_number",
     "get_daily_stats",
-    "increment_daily_stats"
+    "increment_daily_stats",
+    "delete_participant"
 ]
