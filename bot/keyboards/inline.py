@@ -24,7 +24,7 @@ def get_subscription_keyboard() -> InlineKeyboardMarkup:
         inline_keyboard=[
             [InlineKeyboardButton(text="📢 EXEED Russia", url=EXEED_CHANNEL_URL)],
             [InlineKeyboardButton(text="🏟 Лужники", url=LUZHNIKI_CHANNEL_URL)],
-            [InlineKeyboardButton(text="✅ Я подписался", callback_data="check_subscription")]
+            [InlineKeyboardButton(text="✅ Готово", callback_data="check_subscription")]
         ]
     )
 
