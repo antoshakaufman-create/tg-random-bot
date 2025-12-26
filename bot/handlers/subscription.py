@@ -35,8 +35,8 @@ async def check_subscription_callback(callback: CallbackQuery, state: FSMContext
     if exeed_subscribed:
         # User is subscribed
         await callback.message.edit_text(
-            "🎉 Супер! Осталось последнее:\n\n"
-            "📸 Сделайте классное фото на катке и отправьте его сюда!"
+            "Супер! И финальное:\n"
+            "Сделайте классное фото на катке и отправьте его боту."
         )
         
         await state.set_state(TaskStates.waiting_for_photo)
