@@ -16,12 +16,19 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-@router.message(TaskStates.waiting_for_photo, F.photo)
+@router.message(TaskStates.waiting_for_photo, F.photo | F.document)
 async def process_photo(message: Message, state: FSMContext, bot: Bot):
-    """Handle photo upload."""
+    """Handle photo upload (compressed or document)."""
     logger.info(f"Photo received from user {message.from_user.id}")
-    # Get the largest photo (best quality)
-    photo = message.photo[-1]
+    
+    # Check if key is photo or document
+    if message.photo:
+        photo = message.photo[-1]
+    elif message.document and message.document.mime_type.startswith('image'):
+        photo = message.document
+    else:
+        await message.answer("Пожалуйста, отправьте именно изображение (как фото или файл).")
+        return
     
     # Create filename with user_id and timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
