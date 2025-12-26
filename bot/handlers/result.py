@@ -1,7 +1,8 @@
-from aiogram import Router
-from aiogram.types import CallbackQuery
+from aiogram import Router, Bot
+from aiogram.types import CallbackQuery, FSInputFile
 from aiogram.fsm.context import FSMContext
 import asyncio
+import os
 
 from bot.handlers.states import TaskStates
 from bot.database import (
@@ -103,13 +104,26 @@ async def get_result_callback(callback: CallbackQuery, state: FSMContext):
     )
     
     if is_winner:
-        await callback.message.edit_text(
+        # Send photo of brand zone with win message
+        brand_zone_photo = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "brand_zone.jpg")
+        
+        win_caption = (
             f"Спасибо за участие!\n"
             f"Ваш номер: {participant_number} 🎉\n\n"
             f"Поздравляем! Вы выиграли приз от EXEED — фирменный мерч.\n"
-            f"Чтобы получить подарок, подойдите к промоутеру на стойке EXEED и назовите свой номер участника.\n\n"
+            f"Чтобы получить подарок, подойдите на бренд-зону EXEED возле павильона №1 и назовите свой номер участника.\n\n"
             f"Хорошего отдыха и с наступающим!"
         )
+        
+        await callback.message.delete()
+        
+        if os.path.exists(brand_zone_photo):
+            await callback.message.answer_photo(
+                photo=FSInputFile(brand_zone_photo),
+                caption=win_caption
+            )
+        else:
+            await callback.message.answer(win_caption)
     else:
         await callback.message.edit_text(
             f"Спасибо за участие!\n"
