@@ -1,5 +1,5 @@
 from aiogram import Router, Bot
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 from aiogram.enums import ChatMemberStatus
 
@@ -51,3 +51,11 @@ async def check_subscription_callback(callback: CallbackQuery, state: FSMContext
             reply_markup=get_subscription_keyboard()
         )
 
+
+@router.message(TaskStates.checking_subscription)
+async def handle_waiting_for_subscription(message: Message):
+    """Handle messages when waiting for subscription check."""
+    await message.answer(
+        "📢 Пожалуйста, сначала подпишитесь на канал и нажмите кнопку «Готово» под сообщением выше 👆",
+        reply_markup=get_subscription_keyboard()
+    )
