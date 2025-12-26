@@ -7,6 +7,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.types import BufferedInputFile
 
+from bot.config import DATABASE_PATH
 from bot.database import delete_participant
 import aiosqlite
 
