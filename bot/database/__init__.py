@@ -5,7 +5,8 @@ from .db import (
     get_next_participant_number,
     get_daily_stats,
     increment_daily_stats,
-    delete_participant
+    delete_participant,
+    get_participant_by_phone
 )
 
 __all__ = [
@@ -15,5 +16,6 @@ __all__ = [
     "get_next_participant_number",
     "get_daily_stats",
     "increment_daily_stats",
-    "delete_participant"
+    "delete_participant",
+    "get_participant_by_phone"
 ]

@@ -9,7 +9,8 @@ from bot.database import (
     update_participant,
     get_next_participant_number,
     increment_daily_stats,
-    get_or_create_participant
+    get_or_create_participant,
+    get_participant_by_phone
 )
 from bot.utils import check_win
 from bot.config import EXEED_CHANNEL_URL
@@ -53,7 +54,7 @@ async def get_result_callback(callback: CallbackQuery, state: FSMContext):
     existing_prize = participant.get("prize")
     existing_prize_type = participant.get("prize_type")  # Only set after actual participation
     
-    # --- DUPLICATE CHECK ---
+    # --- DUPLICATE CHECK BY TELEGRAM ID ---
     # Check prize_type because is_winner might be 0 by default
     if existing_number and existing_prize_type is not None:
 
@@ -88,6 +89,45 @@ async def get_result_callback(callback: CallbackQuery, state: FSMContext):
             )
         await state.clear()
         return
+    
+    # --- DUPLICATE CHECK BY PHONE NUMBER ---
+    phone = participant.get("phone")
+    if phone:
+        phone_duplicate = await get_participant_by_phone(phone)
+        if phone_duplicate and phone_duplicate.get("telegram_id") != callback.from_user.id:
+            # Someone with this phone already participated
+            dup_number = phone_duplicate.get("participant_number")
+            dup_winner = phone_duplicate.get("is_winner")
+            
+            if dup_winner:
+                brand_zone_photo = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "brand_zone.jpg")
+                
+                win_caption = (
+                    f"Этот номер телефона уже участвовал!\n"
+                    f"Номер участника: {dup_number} 🎉\n\n"
+                    f"Вы выиграли приз от EXEED — фирменный мерч.\n"
+                    f"Чтобы получить подарок, подойдите на бренд-зону EXEED возле павильона №1 и назовите свой номер участника."
+                )
+                
+                await callback.message.delete()
+                
+                if os.path.exists(brand_zone_photo):
+                    await callback.message.answer_photo(
+                        photo=FSInputFile(brand_zone_photo),
+                        caption=win_caption
+                    )
+                else:
+                    await callback.message.answer(win_caption)
+            else:
+                await callback.message.edit_text(
+                    f"Этот номер телефона уже участвовал!\n"
+                    f"Номер участника: {dup_number}\n"
+                    f"К сожалению, в этот раз без призов.\n\n"
+                    f"Но не расстраивайтесь — впереди ещё много активностей от EXEED!\n"
+                    f"Следите за новостями в @exeedrussia."
+                )
+            await state.clear()
+            return
     
     # --- NEW PARTICIPANT ---
     # Show slot machine animation

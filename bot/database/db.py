@@ -62,6 +62,31 @@ async def get_or_create_participant(telegram_id: int, username: str = None) -> d
         return dict(row)
 
 
+async def get_participant_by_phone(phone: str) -> dict | None:
+    """Find participant by phone number (for duplicate check)."""
+    if not phone:
+        return None
+    
+    # Normalize phone - keep only digits
+    phone_digits = ''.join(filter(str.isdigit, phone))
+    
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        # Search for phone containing these digits
+        cursor = await db.execute(
+            "SELECT * FROM participants WHERE phone IS NOT NULL AND prize_type IS NOT NULL"
+        )
+        rows = await cursor.fetchall()
+        
+        for row in rows:
+            row_phone_digits = ''.join(filter(str.isdigit, row['phone'] or ''))
+            # Match last 10 digits (ignoring country code variations)
+            if phone_digits[-10:] == row_phone_digits[-10:]:
+                return dict(row)
+        
+        return None
+
+
 async def update_participant(telegram_id: int, **kwargs) -> None:
     """Update participant fields."""
     if not kwargs:
