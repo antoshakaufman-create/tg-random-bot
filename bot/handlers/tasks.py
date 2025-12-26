@@ -80,8 +80,8 @@ async def process_photo(message: Message, state: FSMContext, bot: Bot):
             await message.answer(f"⚠️ <b>Debug:</b> Не удалось переслать фото в канал.\nОшибка: {str(e)}", parse_mode="HTML")
 
     await message.answer(
-        "Есть! Осталось совсем чуть-чуть.\n"
-        "Нажмите кнопку ниже, чтобы получить номер участника и узнать, выиграли ли вы приз от EXEED.",
+        "📸 Отличное фото!\n\n"
+        "🎰 Нажмите кнопку ниже, чтобы узнать результат розыгрыша!",
         reply_markup=get_finish_keyboard()
     )
     
@@ -92,6 +92,5 @@ async def process_photo(message: Message, state: FSMContext, bot: Bot):
 async def handle_no_photo(message: Message, state: FSMContext):
     """Handle non-photo messages when expecting photo."""
     await message.answer(
-        "❌ Пожалуйста, отправьте фото.\n\n"
-        "Сделайте классное фото на катке и отправьте его сюда! 📷"
+        "📷 Пожалуйста, отправьте фото с катка!"
     )

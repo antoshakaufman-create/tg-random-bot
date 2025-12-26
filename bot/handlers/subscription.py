@@ -35,21 +35,19 @@ async def check_subscription_callback(callback: CallbackQuery, state: FSMContext
     if exeed_subscribed:
         # User is subscribed
         await callback.message.edit_text(
-            "Супер! И финальное:\\n"
-            "Сделайте классное фото на катке и отправьте его боту."
+            "🎉 Супер! Осталось последнее:\n\n"
+            "📸 Сделайте классное фото на катке и отправьте его сюда!"
         )
         
         await state.set_state(TaskStates.waiting_for_photo)
     else:
         await callback.answer(
-            "❌ Вы не подписаны на канал EXEED Russia",
+            "😢 Вы ещё не подписаны на канал EXEED",
             show_alert=True
         )
         
         await callback.message.edit_text(
-            "❌ <b>Вы ещё не подписаны на канал EXEED Russia</b>\n\n"
-            "Пожалуйста, подпишитесь на канал и нажмите кнопку снова:",
-            parse_mode="HTML",
+            "📢 Пожалуйста, подпишитесь на канал EXEED и нажмите «Готово» 👇",
             reply_markup=get_subscription_keyboard()
         )
 
