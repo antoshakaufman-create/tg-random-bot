@@ -63,10 +63,18 @@ async def get_result_callback(callback: CallbackQuery, state: FSMContext):
             # Send photo with win reminder
             brand_zone_photo = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "brand_zone.jpg")
             
+            # Show prize type for duplicate winners
+            existing_prize_type = participant.get("prize_type")
+            if existing_prize_type == "big":
+                prize_text = "🎁 ПОДАРОЧНЫЙ НАБОР от EXEED!"
+            else:
+                prize_text = "🔑 Фирменный брелок от EXEED!"
+            
             win_caption = (
                 f"Вы уже участвовали!\n"
                 f"Ваш номер: {existing_number} 🎉\n\n"
-                f"Вы выиграли приз от EXEED — фирменный мерч.\n"
+                f"Вы выиграли:\n"
+                f"{prize_text}\n\n"
                 f"Чтобы получить подарок, подойдите на бренд-зону EXEED возле павильона №1 и назовите свой номер участника."
             )
             
@@ -159,10 +167,17 @@ async def get_result_callback(callback: CallbackQuery, state: FSMContext):
         # Send photo of brand zone with win message
         brand_zone_photo = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "brand_zone.jpg")
         
+        # Different message for big vs small prize
+        if prize_type == "big":
+            prize_text = "🎁 ПОДАРОЧНЫЙ НАБОР от EXEED!"
+        else:
+            prize_text = "🔑 Фирменный брелок от EXEED!"
+        
         win_caption = (
             f"Спасибо за участие!\n"
             f"Ваш номер: {participant_number} 🎉\n\n"
-            f"Поздравляем! Вы выиграли приз от EXEED — фирменный мерч.\n"
+            f"Поздравляем! Вы выиграли:\n"
+            f"{prize_text}\n\n"
             f"Чтобы получить подарок, подойдите на бренд-зону EXEED возле павильона №1 и назовите свой номер участника.\n\n"
             f"Хорошего отдыха и с наступающим!"
         )
